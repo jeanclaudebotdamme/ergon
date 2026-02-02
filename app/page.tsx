@@ -1,34 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import KanbanColumn from "@/components/KanbanColumn";
-import { Column, Task, fetchColumns, fetchTasks } from "@/lib/supabase";
+import { useKanban } from "@/components/KanbanContext";
 
 export default function Home() {
-  const [columns, setColumns] = useState<Column[]>([]);
-  const [tasks, setTasks] = useState<Task[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { columns, tasks, loading, refreshData } = useKanban();
 
   useEffect(() => {
-    async function loadData() {
-      try {
-        const [columnsData, tasksData] = await Promise.all([
-          fetchColumns(),
-          fetchTasks(),
-        ]);
-        setColumns(columnsData);
-        setTasks(tasksData);
-      } catch (error) {
-        console.error("Error loading data:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadData();
-  }, []);
+    refreshData();
+  }, [refreshData]);
 
   const getTasksForColumn = (columnId: string) => {
     return tasks

@@ -1,10 +1,7 @@
-import type { Metadata } from "next";
-import "./globals.css";
+"use client";
 
-export const metadata: Metadata = {
-  title: "Ergon — Kanban Dashboard",
-  description: "A Kanban collaboration dashboard for team productivity",
-};
+import "./globals.css";
+import { KanbanProvider } from "@/components/KanbanContext";
 
 export default function RootLayout({
   children,
@@ -14,7 +11,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="antialiased min-h-screen">
-        {children}
+        <KanbanProvider>
+          {children}
+        </KanbanProvider>
       </body>
     </html>
   );
