@@ -5,6 +5,22 @@ import Header from "@/components/Header";
 import Sidebar from "@/components/Sidebar";
 import { TokenUsage, fetchUsageByDateRange } from "@/lib/supabase";
 
+// Pricing per 1M tokens
+const PRICING = {
+  anthropic: {
+    input: 15.0,
+    output: 75.0,
+    cacheRead: 0.3,
+    cacheWrite: 3.75,
+  },
+  moonshot: {
+    input: 0.6,
+    output: 3.0,
+    cacheRead: 0.1,
+    cacheWrite: 0.6,
+  },
+};
+
 interface UsageStats {
   totalInput: number;
   totalOutput: number;
@@ -19,7 +35,7 @@ interface UsageStats {
     cacheWrite: number;
     tokens: number;
     cost: number;
-    models: Record<string, { input: number; output: number; tokens: number; cost: number }>;
+    models: Record<string, { input: number; output: number; cacheRead: number; cacheWrite: number; tokens: number; cost: number }>;
   }>;
 }
 
@@ -64,10 +80,12 @@ function calculateStats(records: TokenUsage[]): UsageStats {
     providerStats.cost += record.cost_usd;
 
     if (!providerStats.models[record.model]) {
-      providerStats.models[record.model] = { input: 0, output: 0, tokens: 0, cost: 0 };
+      providerStats.models[record.model] = { input: 0, output: 0, cacheRead: 0, cacheWrite: 0, tokens: 0, cost: 0 };
     }
     providerStats.models[record.model].input += record.input_tokens;
     providerStats.models[record.model].output += record.output_tokens;
+    providerStats.models[record.model].cacheRead += record.cache_read_tokens || 0;
+    providerStats.models[record.model].cacheWrite += record.cache_write_tokens || 0;
     providerStats.models[record.model].tokens += record.total_tokens;
     providerStats.models[record.model].cost += record.cost_usd;
   }
@@ -80,7 +98,10 @@ function formatNumber(num: number): string {
 }
 
 function formatCost(cost: number): string {
-  return `$${cost.toFixed(4)}`;
+  if (cost === 0) return "$0.00";
+  if (cost < 0.01) return `$${cost.toFixed(4)}`;
+  if (cost < 1) return `$${cost.toFixed(3)}`;
+  return `$${cost.toFixed(2)}`;
 }
 
 function getProviderColor(provider: string): string {
@@ -95,6 +116,12 @@ function getProviderDisplayName(provider: string): string {
   if (p === "anthropic") return "Anthropic";
   if (p === "moonshot" || p.includes("kimi")) return "Moonshot / Kimi";
   return provider.charAt(0).toUpperCase() + provider.slice(1);
+}
+
+function getProviderPricing(provider: string): { input: number; output: number; cacheRead: number; cacheWrite: number } {
+  const p = provider.toLowerCase();
+  if (p.includes("anthropic")) return PRICING.anthropic;
+  return PRICING.moonshot;
 }
 
 interface UsageCardProps {
@@ -120,7 +147,7 @@ function UsageCard({ title, stats, isLoading }: UsageCardProps) {
       <h3 className="text-lg font-semibold text-text mb-4">{title}</h3>
       
       {/* Totals */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4 mb-6">
         <div className="bg-surface-secondary rounded-lg p-3">
           <div className="text-xs text-text-muted mb-1">Input Tokens</div>
           <div className="text-xl font-semibold text-text">{formatNumber(stats.totalInput)}</div>
@@ -132,10 +159,6 @@ function UsageCard({ title, stats, isLoading }: UsageCardProps) {
         <div className="bg-surface-secondary rounded-lg p-3">
           <div className="text-xs text-text-muted mb-1">Total Tokens</div>
           <div className="text-xl font-semibold text-text">{formatNumber(stats.totalTokens)}</div>
-        </div>
-        <div className="bg-surface-secondary rounded-lg p-3">
-          <div className="text-xs text-text-muted mb-1">Cost</div>
-          <div className="text-xl font-semibold text-accent-light">{formatCost(stats.totalCost)}</div>
         </div>
       </div>
 
@@ -153,6 +176,14 @@ function UsageCard({ title, stats, isLoading }: UsageCardProps) {
         </div>
       )}
 
+      {/* Total Cost */}
+      <div className="bg-accent/10 rounded-lg p-4 mb-6 border border-accent/20">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-text-muted">Total Cost</span>
+          <span className="text-2xl font-semibold text-accent-light">{formatCost(stats.totalCost)}</span>
+        </div>
+      </div>
+
       {/* Provider Breakdown */}
       {providers.length > 0 && (
         <div className="space-y-4">
@@ -162,9 +193,18 @@ function UsageCard({ title, stats, isLoading }: UsageCardProps) {
           {providers.map((provider) => {
             const pStats = stats.byProvider[provider];
             const models = Object.keys(pStats.models).sort();
+            const pricing = getProviderPricing(provider);
+            
+            // Calculate individual costs for this provider
+            const inputCost = (pStats.input / 1_000_000) * pricing.input;
+            const outputCost = (pStats.output / 1_000_000) * pricing.output;
+            const cacheReadCost = (pStats.cacheRead / 1_000_000) * pricing.cacheRead;
+            const cacheWriteCost = (pStats.cacheWrite / 1_000_000) * pricing.cacheWrite;
+            const calculatedTotalCost = inputCost + outputCost + cacheReadCost + cacheWriteCost;
+            
             return (
               <div key={provider} className="bg-surface-secondary rounded-lg p-4">
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-4">
                   <div
                     className="w-3 h-3 rounded-full"
                     style={{ backgroundColor: getProviderColor(provider) }}
@@ -172,38 +212,79 @@ function UsageCard({ title, stats, isLoading }: UsageCardProps) {
                   <span className="font-medium text-text">
                     {getProviderDisplayName(provider)}
                   </span>
-                  <span className="text-sm text-text-muted ml-auto">
-                    {formatCost(pStats.cost)}
-                  </span>
                 </div>
                 
-                <div className="grid grid-cols-3 gap-3 mb-3">
-                  <div>
-                    <div className="text-xs text-text-muted">Input</div>
-                    <div className="text-sm text-text">{formatNumber(pStats.input)}</div>
+                {/* Token Breakdown with Costs */}
+                <div className="space-y-2 mb-4">
+                  {/* Input */}
+                  <div className="flex items-center justify-between py-1 border-b border-border/50">
+                    <div className="flex items-center gap-4 flex-1">
+                      <span className="text-xs text-text-muted w-20">Input</span>
+                      <span className="text-sm text-text">{formatNumber(pStats.input)}</span>
+                    </div>
+                    <span className="text-sm text-accent-light font-medium">{formatCost(inputCost)}</span>
                   </div>
-                  <div>
-                    <div className="text-xs text-text-muted">Output</div>
-                    <div className="text-sm text-text">{formatNumber(pStats.output)}</div>
+                  
+                  {/* Output */}
+                  <div className="flex items-center justify-between py-1 border-b border-border/50">
+                    <div className="flex items-center gap-4 flex-1">
+                      <span className="text-xs text-text-muted w-20">Output</span>
+                      <span className="text-sm text-text">{formatNumber(pStats.output)}</span>
+                    </div>
+                    <span className="text-sm text-accent-light font-medium">{formatCost(outputCost)}</span>
                   </div>
-                  <div>
-                    <div className="text-xs text-text-muted">Total</div>
-                    <div className="text-sm text-text">{formatNumber(pStats.tokens)}</div>
+                  
+                  {/* Cache Read */}
+                  {(pStats.cacheRead > 0 || pStats.cacheWrite > 0) && (
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <div className="flex items-center gap-4 flex-1">
+                        <span className="text-xs text-text-muted w-20">Cache Read</span>
+                        <span className="text-sm text-text">{formatNumber(pStats.cacheRead)}</span>
+                      </div>
+                      <span className="text-sm text-accent-light font-medium">{formatCost(cacheReadCost)}</span>
+                    </div>
+                  )}
+                  
+                  {/* Cache Write */}
+                  {(pStats.cacheRead > 0 || pStats.cacheWrite > 0) && (
+                    <div className="flex items-center justify-between py-1 border-b border-border/50">
+                      <div className="flex items-center gap-4 flex-1">
+                        <span className="text-xs text-text-muted w-20">Cache Write</span>
+                        <span className="text-sm text-text">{formatNumber(pStats.cacheWrite)}</span>
+                      </div>
+                      <span className="text-sm text-accent-light font-medium">{formatCost(cacheWriteCost)}</span>
+                    </div>
+                  )}
+                  
+                  {/* Total for this provider */}
+                  <div className="flex items-center justify-between py-2 mt-2 bg-surface/50 rounded px-2">
+                    <div className="flex items-center gap-4 flex-1">
+                      <span className="text-xs font-medium text-text w-20">Total</span>
+                      <span className="text-sm font-medium text-text">{formatNumber(pStats.tokens)}</span>
+                    </div>
+                    <span className="text-sm font-semibold text-accent-light">{formatCost(calculatedTotalCost)}</span>
                   </div>
                 </div>
 
                 {/* Models */}
                 {models.length > 0 && (
-                  <div className="mt-3 pt-3 border-t border-border">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <div className="text-xs text-text-muted mb-2">Models</div>
                     <div className="space-y-2">
                       {models.map((model) => {
                         const mStats = pStats.models[model];
+                        // Calculate costs for this model
+                        const mInputCost = (mStats.input / 1_000_000) * pricing.input;
+                        const mOutputCost = (mStats.output / 1_000_000) * pricing.output;
+                        const mCacheReadCost = (mStats.cacheRead / 1_000_000) * pricing.cacheRead;
+                        const mCacheWriteCost = (mStats.cacheWrite / 1_000_000) * pricing.cacheWrite;
+                        const mTotalCost = mInputCost + mOutputCost + mCacheReadCost + mCacheWriteCost;
+                        
                         return (
-                          <div key={model} className="flex items-center justify-between text-sm">
+                          <div key={model} className="flex items-center justify-between text-sm py-1">
                             <span className="text-text-muted truncate flex-1">{model}</span>
-                            <span className="text-text mx-4">{formatNumber(mStats.tokens)} tokens</span>
-                            <span className="text-accent-light">{formatCost(mStats.cost)}</span>
+                            <span className="text-text mx-4">{formatNumber(mStats.tokens)}</span>
+                            <span className="text-accent-light font-medium">{formatCost(mTotalCost)}</span>
                           </div>
                         );
                       })}
