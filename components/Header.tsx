@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useKanban } from "./KanbanContext";
 import Modal from "./Modal";
 import TaskForm from "./TaskForm";
@@ -12,6 +14,8 @@ interface HeaderProps {
 export default function Header({ title = "Ergon" }: HeaderProps) {
   const { tasks, columns } = useKanban();
   const [showNewTaskModal, setShowNewTaskModal] = useState(false);
+  const pathname = usePathname();
+  const isUsagePage = pathname === "/usage";
 
   // Calculate stats
   const inProgressColumn = columns.find(c => c.status_key === "progress");
@@ -49,18 +53,44 @@ export default function Header({ title = "Ergon" }: HeaderProps) {
             </div>
           </div>
 
-          {/* Filter Button */}
-          <button className="px-4 py-2 bg-transparent text-text-muted border border-[#333] rounded-lg text-sm font-medium hover:bg-surface-hover hover:text-text transition-all duration-150">
-            Filter
-          </button>
+          {/* Filter Button - only show on board page */}
+          {!isUsagePage && (
+            <button className="px-4 py-2 bg-transparent text-text-muted border border-[#333] rounded-lg text-sm font-medium hover:bg-surface-hover hover:text-text transition-all duration-150">
+              Filter
+            </button>
+          )}
 
-          {/* New Task Button */}
-          <button 
-            onClick={() => setShowNewTaskModal(true)}
-            className="px-4 py-2 bg-accent text-text rounded-lg text-sm font-medium hover:bg-accent-hover transition-all duration-150"
+          {/* Usage Link */}
+          <Link
+            href="/usage"
+            className={`px-4 py-2 rounded-lg text-sm font-medium transition-all duration-150 ${
+              isUsagePage
+                ? "bg-accent text-text"
+                : "bg-transparent text-text-muted border border-[#333] hover:bg-surface-hover hover:text-text"
+            }`}
           >
-            + New Task
-          </button>
+            Usage
+          </Link>
+
+          {/* Board Link - show on usage page */}
+          {isUsagePage && (
+            <Link
+              href="/"
+              className="px-4 py-2 bg-transparent text-text-muted border border-[#333] rounded-lg text-sm font-medium hover:bg-surface-hover hover:text-text transition-all duration-150"
+            >
+              Board
+            </Link>
+          )}
+
+          {/* New Task Button - only show on board page */}
+          {!isUsagePage && (
+            <button 
+              onClick={() => setShowNewTaskModal(true)}
+              className="px-4 py-2 bg-accent text-text rounded-lg text-sm font-medium hover:bg-accent-hover transition-all duration-150"
+            >
+              + New Task
+            </button>
+          )}
         </div>
       </header>
 

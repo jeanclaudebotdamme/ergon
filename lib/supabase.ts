@@ -78,3 +78,29 @@ export async function deleteTask(id: string): Promise<void> {
   
   if (error) throw error;
 }
+
+// Token Usage Types
+export interface TokenUsage {
+  id: string;
+  provider: string;
+  model: string;
+  input_tokens: number;
+  output_tokens: number;
+  cache_read_tokens: number;
+  cache_write_tokens: number;
+  total_tokens: number;
+  cost_usd: number;
+  recorded_at: string;
+}
+
+export async function fetchUsageByDateRange(startDate: string, endDate: string): Promise<TokenUsage[]> {
+  const { data, error } = await supabase
+    .from("token_usage")
+    .select("*")
+    .gte("recorded_at", startDate)
+    .lte("recorded_at", endDate)
+    .order("recorded_at", { ascending: false });
+  
+  if (error) throw error;
+  return data || [];
+}
