@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Stoa — Dashboard Mockup</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: #1a1a1a;
+      color: #e8e4df;
+      min-height: 100vh;
+      font-size: 15px;
+      line-height: 1.6;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 20px 32px;
+      border-bottom: 1px solid #2a2a2a;
+      background-color: #1a1a1a;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 32px;
+      height: 32px;
+      background: linear-gradient(135deg, #2d5a3d 0%, #1e3d29 100%);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      font-size: 14px;
+      color: #a8c5b0;
+    }
+
+    .logo-text {
+      font-size: 20px;
+      font-weight: 600;
+      color: #e8e4df;
+      letter-spacing: -0.02em;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: #2d5a3d;
+      color: #e8e4df;
+    }
+
+    .btn-primary:hover {
+      background: #3a7550;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: #a0a0a0;
+      border: 1px solid #333;
+    }
+
+    .btn-ghost:hover {
+      background: #252525;
+      color: #e8e4df;
+    }
+
+    /* Main content */
+    .main {
+      display: flex;
+      height: calc(100vh - 73px);
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 240px;
+      background: #1f1f1f;
+      border-right: 1px solid #2a2a2a;
+      padding: 20px 16px;
+      flex-shrink: 0;
+    }
+
+    .sidebar-section {
+      margin-bottom: 24px;
+    }
+
+    .sidebar-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #666;
+      margin-bottom: 8px;
+      padding: 0 8px;
+    }
+
+    .sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      color: #a0a0a0;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-size: 14px;
+    }
+
+    .sidebar-item:hover {
+      background: #252525;
+      color: #e8e4df;
+    }
+
+    .sidebar-item.active {
+      background: #252525;
+      color: #e8e4df;
+    }
+
+    .sidebar-item-icon {
+      width: 18px;
+      height: 18px;
+      opacity: 0.7;
+    }
+
+    .sidebar-badge {
+      margin-left: auto;
+      background: #2d5a3d;
+      color: #a8c5b0;
+      font-size: 11px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    /* Kanban board */
+    .board {
+      flex: 1;
+      padding: 24px;
+      overflow-x: auto;
+    }
+
+    .board-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .board-title {
+      font-size: 24px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+    }
+
+    .columns {
+      display: flex;
+      gap: 16px;
+      height: calc(100% - 60px);
+    }
+
+    .column {
+      width: 280px;
+      flex-shrink: 0;
+      background: #222;
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .column-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .column-title {
+      font-size: 13px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #888;
+    }
+
+    .column-count {
+      font-size: 12px;
+      color: #555;
+      background: #2a2a2a;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+
+    .column-cards {
+      flex: 1;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .card {
+      background: #2a2a2a;
+      border-radius: 10px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+
+    .card:hover {
+      background: #303030;
+      border-color: #3a3a3a;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: #e8e4df;
+    }
+
+    .card-meta {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .card-tag {
+      font-size: 11px;
+      padding: 3px 8px;
+      border-radius: 4px;
+      font-weight: 500;
+    }
+
+    .tag-jason {
+      background: rgba(45, 90, 61, 0.3);
+      color: #7cb88a;
+    }
+
+    .tag-jc {
+      background: rgba(82, 82, 122, 0.3);
+      color: #a0a0d0;
+    }
+
+    .tag-priority {
+      background: rgba(180, 100, 60, 0.25);
+      color: #d4a574;
+    }
+
+    .card-date {
+      font-size: 11px;
+      color: #666;
+      margin-left: auto;
+    }
+
+    .add-card {
+      margin-top: 12px;
+      padding: 10px;
+      border: 1px dashed #3a3a3a;
+      border-radius: 8px;
+      color: #555;
+      font-size: 13px;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s ease;
+    }
+
+    .add-card:hover {
+      border-color: #4a4a4a;
+      color: #777;
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* Column accent colors */
+    .column[data-status="backlog"] .column-title { color: #888; }
+    .column[data-status="progress"] .column-title { color: #7cb88a; }
+    .column[data-status="jason"] .column-title { color: #d4a574; }
+    .column[data-status="jc"] .column-title { color: #a0a0d0; }
+    .column[data-status="done"] .column-title { color: #5a8a6a; }
+
+    /* Status indicator dots */
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 8px;
+    }
+
+    .column[data-status="backlog"] .status-dot { background: #555; }
+    .column[data-status="progress"] .status-dot { background: #7cb88a; }
+    .column[data-status="jason"] .status-dot { background: #d4a574; }
+    .column[data-status="jc"] .status-dot { background: #a0a0d0; }
+    .column[data-status="done"] .status-dot { background: #3d6b4a; }
+
+    /* Quick stats */
+    .quick-stats {
+      display: flex;
+      gap: 12px;
+    }
+
+    .stat {
+      background: #252525;
+      padding: 6px 12px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: #888;
+    }
+
+    .stat-value {
+      color: #e8e4df;
+      font-weight: 500;
+      margin-right: 4px;
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="logo">
+      <div class="logo-icon">S</div>
+      <span class="logo-text">Stoa</span>
+    </div>
+    <div class="header-actions">
+      <div class="quick-stats">
+        <div class="stat"><span class="stat-value">3</span> in progress</div>
+        <div class="stat"><span class="stat-value">2</span> need action</div>
+      </div>
+      <button class="btn btn-ghost">Filter</button>
+      <button class="btn btn-primary">+ New Task</button>
+    </div>
+  </header>
+
+  <main class="main">
+    <aside class="sidebar">
+      <div class="sidebar-section">
+        <div class="sidebar-label">Views</div>
+        <div class="sidebar-item active">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7" rx="1"/>
+            <rect x="14" y="3" width="7" height="7" rx="1"/>
+            <rect x="3" y="14" width="7" height="7" rx="1"/>
+            <rect x="14" y="14" width="7" height="7" rx="1"/>
+          </svg>
+          Board
+        </div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="8" y1="6" x2="21" y2="6"/>
+            <line x1="8" y1="12" x2="21" y2="12"/>
+            <line x1="8" y1="18" x2="21" y2="18"/>
+            <line x1="3" y1="6" x2="3.01" y2="6"/>
+            <line x1="3" y1="12" x2="3.01" y2="12"/>
+            <line x1="3" y1="18" x2="3.01" y2="18"/>
+          </svg>
+          List
+        </div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="16" y1="13" x2="8" y2="13"/>
+            <line x1="16" y1="17" x2="8" y2="17"/>
+          </svg>
+          Notes
+          <span class="sidebar-badge">4</span>
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Projects</div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          Stoa Dashboard
+        </div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+          </svg>
+          Growth Machina
+        </div>
+      </div>
+
+      <div class="sidebar-section">
+        <div class="sidebar-label">Team</div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+          Jason
+        </div>
+        <div class="sidebar-item">
+          <svg class="sidebar-item-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="11" width="18" height="10" rx="2"/>
+            <circle cx="12" cy="5" r="2"/>
+          </svg>
+          JC
+        </div>
+      </div>
+    </aside>
+
+    <section class="board">
+      <div class="board-header">
+        <h1 class="board-title">Stoa Dashboard</h1>
+      </div>
+
+      <div class="columns">
+        <div class="column" data-status="backlog">
+          <div class="column-header">
+            <span class="column-title"><span class="status-dot"></span>Backlog</span>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-cards">
+            <div class="card">
+              <div class="card-title">Research Supabase auth patterns</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jc">JC</span>
+                <span class="card-date">Feb 1</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Explore calendar API options</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Feb 2</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-card">+ Add task</div>
+        </div>
+
+        <div class="column" data-status="progress">
+          <div class="column-header">
+            <span class="column-title"><span class="status-dot"></span>In Progress</span>
+            <span class="column-count">3</span>
+          </div>
+          <div class="column-cards">
+            <div class="card">
+              <div class="card-title">Build Stoa dashboard MVP</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jc">JC</span>
+                <span class="card-tag tag-priority">Priority</span>
+                <span class="card-date">Feb 1</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Gmail OAuth setup</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Feb 1</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Document Growth Machina functions</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Jan 31</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-card">+ Add task</div>
+        </div>
+
+        <div class="column" data-status="jason">
+          <div class="column-header">
+            <span class="column-title"><span class="status-dot"></span>Needs Jason</span>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-cards">
+            <div class="card">
+              <div class="card-title">Create Supabase project & share keys</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Feb 1</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-card">+ Add task</div>
+        </div>
+
+        <div class="column" data-status="jc">
+          <div class="column-header">
+            <span class="column-title"><span class="status-dot"></span>Needs JC</span>
+            <span class="column-count">1</span>
+          </div>
+          <div class="column-cards">
+            <div class="card">
+              <div class="card-title">Review Growth Machina MD files</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jc">JC</span>
+                <span class="card-date">Feb 2</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-card">+ Add task</div>
+        </div>
+
+        <div class="column" data-status="done">
+          <div class="column-header">
+            <span class="column-title"><span class="status-dot"></span>Done</span>
+            <span class="column-count">2</span>
+          </div>
+          <div class="column-cards">
+            <div class="card">
+              <div class="card-title">Initial OpenClaw setup</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Jan 31</span>
+              </div>
+            </div>
+            <div class="card">
+              <div class="card-title">Define Stoa MVP requirements</div>
+              <div class="card-meta">
+                <span class="card-tag tag-jc">JC</span>
+                <span class="card-tag tag-jason">Jason</span>
+                <span class="card-date">Feb 1</span>
+              </div>
+            </div>
+          </div>
+          <div class="add-card">+ Add task</div>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
